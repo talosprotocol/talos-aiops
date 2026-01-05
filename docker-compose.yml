@@ -16,14 +16,13 @@ services:
       - control-plane
     profiles:
       - released
-      - workspace
 
   # --- Local SDK Mount (Workspace Mode) ---
   # Overrides the 'released' api service when in workspace profile
   api-workspace:
     extends: api
     volumes:
-      - /mnt/workspace/talos-sdk-py:/mnt/workspace/talos-sdk-py:ro
+      - ${TALOS_SDK_PATH:-./}:/mnt/workspace/talos-sdk-py:ro
     environment:
         - PIP_install_EDITABLE=/mnt/workspace/talos-sdk-py
     profiles:
@@ -42,8 +41,10 @@ services:
   # --- UI ---
   ui:
     image: nginx:alpine 
-    # Placeholder for now, serving static dashboard
+    # Placeholder serving static dashboard
     container_name: talos-aiops-ui
+    volumes:
+      - ./ui/index.html:/usr/share/nginx/html/index.html:ro
     ports:
       - "3001:80"
     networks:

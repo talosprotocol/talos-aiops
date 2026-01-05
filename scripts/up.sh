@@ -11,12 +11,14 @@ echo "🚀 Starting DevOps Agent in [$MODE] mode..."
 
 # 1. Validation for Workspace Mode
 if [ "$MODE" == "workspace" ]; then
-    SDK_PATH="../../talos-sdk-py"
+    SDK_PATH="../talos-sdk-py"
     if [ ! -d "$SDK_PATH" ]; then
         echo "❌ Error: SDK path $SDK_PATH not found for workspace mode."
         exit 1
     fi
-    echo "📂 Mounting SDK from: $SDK_PATH"
+    # Resolve absolute path for Docker mount
+    export TALOS_SDK_PATH=$(cd "$SDK_PATH" && pwd)
+    echo "📂 Mounting SDK from: $TALOS_SDK_PATH"
 fi
 
 # 2. Network Cleanup

@@ -18,7 +18,14 @@ fi
 # 2. Network Isolation Verification
 # Agent Container (on agent-net) should NOT reach Cloud net directly
 echo "🔒 Verifying Network Isolation..."
-ISOLATION_TEST=$(docker exec talos-aiops-api curl -s -o /dev/null -w "%{http_code}" http://talos-aiops-cloud:4566 --connect-timeout 2 || echo "BLOCKED")
+ISOLATION_TEST=$(docker exec talos-aiops-api python -c "
+import urllib.request
+try:
+    urllib.request.urlopen('http://talos-aiops-cloud:4566', timeout=2)
+    print('CONNECTED')
+except Exception:
+    print('BLOCKED')
+")
 
 if [ "$ISOLATION_TEST" == "BLOCKED" ] || [ "$ISOLATION_TEST" == "000" ]; then
     echo "✅ Isolation Confirmed: Agent cannot reach Cloud (Result: $ISOLATION_TEST)"

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talos DevOps Mission Control</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #111;
+            color: #eee;
+            padding: 2rem;
+        }
+
+        .card {
+            background: #222;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #333;
+        }
+
+        h1 {
+            color: #00ff9d;
+        }
+
+        h2 {
+            border-bottom: 1px solid #444;
+            padding-bottom: 0.5rem;
+        }
+
+        #logs {
+            font-family: monospace;
+            background: #000;
+            padding: 1rem;
+            height: 300px;
+            overflow-y: scroll;
+            color: #0f0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background: #333;
+        }
+
+        .success {
+            color: #0f0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🚀 Talos DevOps Mission Control</h1>
+
+    <div class="card">
+        <h2>System Status</h2>
+        <div>Agent Health: <span id="health" class="status-badge">Checking...</span></div>
+        <div>Mode: <span id="mode" class="status-badge">...</span></div>
+        <div>Active Jobs: <span id="jobs">0</span></div>
+    </div>
+
+    <div class="card">
+        <h2>Live Logs</h2>
+        <div id="logs">Connecting to log stream...</div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8200";
+
+        async function updateHealth() {
+            try {
+                const res = await fetch(`${API_URL}/health`);
+                const data = await res.json();
+                document.getElementById("health").textContent = "ONLINE";
+                document.getElementById("health").classList.add("success");
+                document.getElementById("mode").textContent = data.mode;
+            } catch (e) {
+                console.error("Health check failed:", e);
+                document.getElementById("health").textContent = "OFFLINE";
+            }
+        }
+
+        async function fetchLogs() {
+            try {
+                const res = await fetch(`${API_URL}/v1/logs`);
+                const logs = await res.json();
+                const logDiv = document.getElementById("logs");
+                logDiv.innerHTML = logs.map(l => `[${l.timestamp}] ${l.level}: ${l.message}`).join("<br>");
+            } catch (e) {
+                console.error("Log fetch failed:", e);
+            }
+        }
+
+        setInterval(updateHealth, 2000);
+        setInterval(fetchLogs, 5000);
+        updateHealth().catch(console.error);
+        fetchLogs().catch(console.error);
+    </script>
+</body>
+
+</html>

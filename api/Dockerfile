@@ -7,8 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/ /app/src/
 
-# For workspace mode, we might need to install from /mnt/workspace
-# This is handled by a startup script or manual pip install if needed, 
-# strictly using -e /mnt/workspace/talos-sdk-py
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
 
-CMD ["python", "src/main.py"]
+CMD ["./entrypoint.sh"]
