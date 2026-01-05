@@ -1,0 +1,62 @@
+services:
+  # --- Backend ---
+  api:
+    build: 
+      context: ./api
+      dockerfile: Dockerfile
+    image: talos-aiops-api:latest
+    container_name: talos-aiops-api
+    ports:
+      - "8200:8200"
+    environment:
+      - EXAMPLES_MODE=${EXAMPLES_MODE:-released}
+      - TALOS_NODE_URL=http://talos-node:8000
+    networks:
+      - agent-net
+      - control-plane
+    profiles:
+      - released
+      - workspace
+
+  # --- Local SDK Mount (Workspace Mode) ---
+  # Overrides the 'released' api service when in workspace profile
+  api-workspace:
+    extends: api
+    volumes:
+      - /mnt/workspace/talos-sdk-py:/mnt/workspace/talos-sdk-py:ro
+    environment:
+        - PIP_install_EDITABLE=/mnt/workspace/talos-sdk-py
+    profiles:
+      - workspace
+
+  # --- Infrastructure Mocks ---
+  cloud-emulator:
+    image: localstack/localstack:3.0
+    container_name: talos-aiops-cloud
+    networks:
+      - cloud-net
+    profiles:
+      - released
+      - workspace
+
+  # --- UI ---
+  ui:
+    image: nginx:alpine 
+    # Placeholder for now, serving static dashboard
+    container_name: talos-aiops-ui
+    ports:
+      - "3001:80"
+    networks:
+      - agent-net
+    profiles:
+      - released
+      - workspace
+
+networks:
+  agent-net:
+    internal: true
+  cloud-net:
+    internal: true
+  control-plane:
+    # Bridge to Talos Node (mocked here as external for now)
+    driver: bridge
