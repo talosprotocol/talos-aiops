@@ -7,3 +7,9 @@ A feature-complete, standalone DevOps automation agent secured by [Talos Protoco
 - **Secure Execution**: Capability-based tool execution (AWS, K8s, Terraform).
 - **Audit**: Immutable usage logs.
 - **Tools**: MCP-compatible tool integration.
+
+## License
+
+Licensed under the Apache License 2.0. See [LICENSE](LICENSE).
+
+Licensed under the Apache License 2.0. See [LICENSE](LICENSE).
