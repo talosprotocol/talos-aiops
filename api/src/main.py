@@ -19,9 +19,9 @@ app.add_middleware(
 
 # Configuration from Env
 MODE = os.getenv("EXAMPLES_MODE", "released")
-SDK_VERSION = "0.1.0" # Mock for now, should read from pkg
+SDK_VERSION = "0.1.0" # Should read from pkg
 PROTOCOL_RANGE = "1.0-2.0"
-CONTRACT_HASH = "mock_contract_hash" 
+CONTRACT_HASH = os.getenv("TALOS_CONTRACT_HASH", "0x0000000000000000000000000000000000000000")
 
 class TriggerRequest(BaseModel):
     action: Literal["plan_deploy_verify", "deny_demo", "status_only"]
