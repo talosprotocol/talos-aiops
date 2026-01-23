@@ -8,8 +8,9 @@ A feature-complete, standalone DevOps automation agent secured by [Talos Protoco
 - **Audit**: Immutable usage logs.
 - **Tools**: MCP-compatible tool integration.
 
-## License
+## References
+1. [Talos Wiki](https://github.com/talosprotocol/talos/wiki)
 
-Licensed under the Apache License 2.0. See [LICENSE](LICENSE).
+## License
 
 Licensed under the Apache License 2.0. See [LICENSE](LICENSE).
