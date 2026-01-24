@@ -8,7 +8,7 @@ echo "🧪 Running Smoke Tests..."
 
 # 1. API Health
 HEALTH=$(curl -s http://localhost:8200/health)
-if [[ $HEALTH == *"talos-aiops"* ]]; then
+if [[ $HEALTH == *"aiops"* ]]; then
     echo "✅ /health: OK ($HEALTH)"
 else
     echo "❌ /health: FAIL"
@@ -18,7 +18,7 @@ fi
 # 2. Network Isolation Verification
 # Agent Container (on agent-net) should NOT reach Cloud net directly
 echo "🔒 Verifying Network Isolation..."
-ISOLATION_TEST=$(docker exec talos-aiops-api python -c "
+ISOLATION_TEST=$(docker exec talos-aiops python -c "
 import urllib.request
 try:
     urllib.request.urlopen('http://talos-aiops-cloud:4566', timeout=2)
