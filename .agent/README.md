@@ -1,4 +1,5 @@
 # Agent workspace: services/aiops
+> **Project**: services/aiops
 
 This folder contains agent-facing context, tasks, workflows, and planning artifacts for this submodule.
 
