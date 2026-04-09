@@ -3,8 +3,12 @@ from contextlib import asynccontextmanager
 import os
 import asyncio
 import logging
+from datetime import datetime, timezone
+import uuid
 from prometheus_client import start_http_server, Gauge, generate_latest, CONTENT_TYPE_LATEST
 from fastapi.responses import Response
+from pydantic import BaseModel
+from typing import Dict, Any, List, Optional
 
 from src.engine.assembler import TraceAssembler
 from src.engine.markov import TransitionMatrixEngine
@@ -27,6 +31,12 @@ worker = None
 # Scoring History for Integrity Calculation
 SCORE_HISTORY = []
 MAX_HISTORY = 100
+
+# Job Tracking for Demo
+JOBS = {}
+
+class TriggerRequest(BaseModel):
+    action: str
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -68,10 +78,6 @@ async def background_scoring_loop():
             # 2. Process Finalized Traces
             traces = assembler.get_finalized_batch()
             for trace in traces:
-                # Add to model window
-                # Convert trace object to list of events for engine
-                # TraceAssembler stores raw events in trace.events
-                
                 # Score BEFORE learning (for anomaly detection)
                 score = engine.score_trace(trace.events)
                 SCORE_HISTORY.append(score)
@@ -89,8 +95,6 @@ async def background_scoring_loop():
             AIOPS_MODEL_READY.set(1 if ready else 0)
             
             # Calculate Integrity Score (Real Logic)
-            # Integrity = 1.0 / (1.0 + Average_Anomaly_Score)
-            # Higher anomaly score -> Lower Integrity
             current_integrity = 1.0
             if SCORE_HISTORY:
                 avg_score = sum(SCORE_HISTORY) / len(SCORE_HISTORY)
@@ -103,6 +107,53 @@ async def background_scoring_loop():
             
         await asyncio.sleep(5)
 
+@app.get("/v1/status")
+async def get_v1_status():
+    """V1 status endpoint for dashboard parity."""
+    ready = engine.total_traces > 100
+    score = 1.0
+    try:
+        score = AIOPS_INTEGRITY_SCORE.collect()[0].samples[0].value
+    except (IndexError, AttributeError):
+        pass
+        
+    return {
+        "status": "ready" if ready else "training",
+        "model_ready": ready,
+        "integrity_score": score,
+        "active_traces": len(assembler.traces)
+    }
+
+@app.post("/v1/trigger")
+async def trigger_job(req: TriggerRequest):
+    """Trigger a mock DevOps job for demonstration."""
+    job_id = f"job-{uuid.uuid4().hex[:8]}"
+    
+    status = "queued"
+    if req.action == "deny_demo":
+        status = "denied"
+    elif req.action == "plan_deploy_verify":
+        status = "completed"
+        
+    job = {
+        "job_id": job_id,
+        "status": status,
+        "action": req.action,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+    JOBS[job_id] = job
+    
+    return job
+
+@app.get("/v1/logs")
+async def get_logs(limit: int = 200):
+    """Return recent system logs."""
+    # Mock logs for demo
+    return [
+        f"[{datetime.now(timezone.utc).isoformat()}] INFO: Ingestion worker processed batch",
+        f"[{datetime.now(timezone.utc).isoformat()}] INFO: Anomaly model updated (traces={engine.total_traces})",
+    ]
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "service": "aiops", "model_ready": engine.total_traces > 100}
@@ -111,11 +162,17 @@ async def health():
 async def integrity_metrics():
     """Operational metrics for the anomaly detection engine."""
     ready = engine.total_traces > 100
+    score = 1.0
+    try:
+        score = AIOPS_INTEGRITY_SCORE.collect()[0].samples[0].value
+    except (IndexError, AttributeError):
+        pass
+
     return {
         "model_ready": ready,
         "readiness_reason": "ok" if ready else f"insufficient_data ({engine.total_traces}/100 traces)",
         "training_window_traces": engine.total_traces,
-        "integrity_score": AIOPS_INTEGRITY_SCORE.collect()[0].samples[0].value, # Live value
+        "integrity_score": score,
         "recent_anomaly_scores_avg": sum(SCORE_HISTORY)/len(SCORE_HISTORY) if SCORE_HISTORY else 0.0,
         "stats": {
             "states": len(engine.states),
