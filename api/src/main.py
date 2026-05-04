@@ -1,14 +1,13 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import os
 import asyncio
 import logging
 from datetime import datetime, timezone
 import uuid
-from prometheus_client import start_http_server, Gauge, generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import Gauge, generate_latest, CONTENT_TYPE_LATEST
 from fastapi.responses import Response
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
 
 from src.engine.assembler import TraceAssembler
 from src.engine.markov import TransitionMatrixEngine

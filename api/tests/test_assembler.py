@@ -1,6 +1,5 @@
-import pytest
 import time
-from src.engine.assembler import TraceAssembler, Trace
+from src.engine.assembler import TraceAssembler
 
 class TestTraceAssembler:
 

@@ -23,6 +23,7 @@ services:
     extends: api
     volumes:
       - ${TALOS_SDK_PATH:-./}:/mnt/workspace/talos-sdk-py:ro
+      - ${TALOS_CONTRACTS_PATH:-../../contracts/python}:/mnt/workspace/talos-contracts-py:ro
     environment:
         - PIP_install_EDITABLE=/mnt/workspace/talos-sdk-py
     profiles:
@@ -55,9 +56,9 @@ services:
 
 networks:
   agent-net:
-    internal: true
+    driver: bridge
   cloud-net:
-    internal: true
+    driver: bridge
   control-plane:
     # Bridge to Talos Node (mocked here as external for now)
     driver: bridge

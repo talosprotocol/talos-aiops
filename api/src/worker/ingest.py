@@ -5,7 +5,7 @@ import os
 import time
 import httpx
 from collections import OrderedDict
-from typing import Optional, Set
+from typing import Optional
 
 from src.engine.assembler import TraceAssembler
 

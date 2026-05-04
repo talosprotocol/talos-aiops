@@ -1,4 +1,4 @@
-from typing import Dict, List, Deque, Optional
+from typing import Dict, List, Deque
 from datetime import datetime
 from collections import deque
 import time
