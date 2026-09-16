@@ -1,5 +1,5 @@
 fastapi>=0.115.0
-uvicorn>=0.30.0
+uvicorn>=0.52.4
 pydantic>=2.10.0
 sqlalchemy>=2.0.30
 cryptography>=46.0.3
